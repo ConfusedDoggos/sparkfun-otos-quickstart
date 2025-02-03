@@ -22,7 +22,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import java.util.Timer;
 @Config
-@Autonomous(name = "SpecimenAuto", group = "Autonomous")
+@Autonomous(name = "SampleAuto", group = "Autonomous")
 public class SampleAuto extends LinearOpMode {
     //@Config
     // i = intake, iC = intake claw, iW = intake wrist, iA = intake arm
