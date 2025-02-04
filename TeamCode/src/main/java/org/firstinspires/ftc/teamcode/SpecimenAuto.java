@@ -644,23 +644,6 @@ public class SpecimenAuto extends LinearOpMode {
         }
 
     }
-    public class Roadrunner {
-
-        private Pose2d currentPos;
-
-        public class FindPose implements Action {
-            @Override
-            public boolean run(@NonNull TelemetryPacket packet) {
-                RRPos = currentPos;
-                return false;
-            }
-        }
-        public Action findPose(Pose2d CurrentPos) {
-            currentPos = CurrentPos;
-            return new FindPose();
-        }
-
-    }
 
     public SpecimenAuto() {
     }
@@ -677,7 +660,6 @@ public class SpecimenAuto extends LinearOpMode {
         HorizontalSlide horizontalSlide = new HorizontalSlide(hardwareMap);
         DeliverySystem deliverySystem = new DeliverySystem(hardwareMap);
         IntakeSystem intakeSystem = new IntakeSystem(hardwareMap);
-        Roadrunner roadrunner = new Roadrunner();
 
         initMotors();
         initServos();
@@ -692,39 +674,33 @@ public class SpecimenAuto extends LinearOpMode {
             Actions.runBlocking(
                     new SequentialAction (
                             new ParallelAction (
-                                    drive.actionBuilder(drive.pose)
+                                    drive.actionBuilder(initialPose)
                                             .lineToY(lineToY1)
-                                            .stopAndAdd(roadrunner.findPose(drive.pose))
                                             .build(),
                                     verticalSlide.slideUp()
                             ),
                             deliverySystem.deliverToBar(),
                             new SleepAction(BarDeliverWait),
                             verticalSlide.slideDown(),
-                            drive.actionBuilder(RRPos)
+                            drive.actionBuilder(new Pose2d(RRInitPosX,lineToY1,Math.toRadians(RRInitPosHeading)))
                                     .lineToY(lineToY2)
-                                    .stopAndAdd(roadrunner.findPose(drive.pose))
                                     .build(),
 
                             //Push in sample to human player and pick up second
 
-                            drive.actionBuilder(RRPos)
+                            drive.actionBuilder(new Pose2d(RRInitPosX,lineToY2,Math.toRadians(RRInitPosHeading)))
                                     .strafeToLinearHeading(new Vector2d(strafeTo1X,strafeTo1Y),Math.toRadians(90),null,fastMode)
-                                    .stopAndAdd(roadrunner.findPose(drive.pose))
                                     .build(),
-                            drive.actionBuilder(RRPos)
+                            drive.actionBuilder(new Pose2d(strafeTo1X,strafeTo1Y,Math.toRadians(RRInitPosHeading)))
                                     .turnTo(Math.toRadians(turnTo1))
-                                    .stopAndAdd(roadrunner.findPose(drive.pose))
                                     .build(),
-                            drive.actionBuilder(RRPos)
+                            drive.actionBuilder(new Pose2d(strafeTo1X,strafeTo1Y,Math.toRadians(turnTo1)))
                                     .strafeToLinearHeading(new Vector2d(strafeTo2X,strafeTo2Y),Math.toRadians(270),null,fastMode)
                                     .strafeToLinearHeading(new Vector2d(strafeTo3X,strafeTo3Y),Math.toRadians(270),null,fastMode)
                                     .strafeToLinearHeading(new Vector2d(strafeTo4X,strafeTo4Y),Math.toRadians(270),null,fastMode)
-                                    .stopAndAdd(roadrunner.findPose(drive.pose))
                                     .build(),
-                            drive.actionBuilder(RRPos)
+                            drive.actionBuilder(new Pose2d(strafeTo4X,strafeTo4Y,Math.toRadians(turnTo1)))
                                     .strafeTo(new Vector2d(strafeTo5X,strafeTo5Y))
-                                    .stopAndAdd(roadrunner.findPose(drive.pose))
                                     .build(),
                             new SleepAction(1)/*,
                             drive.actionBuilder(drive.pose)
