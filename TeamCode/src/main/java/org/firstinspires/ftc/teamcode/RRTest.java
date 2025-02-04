@@ -28,7 +28,7 @@ public class RRTest extends LinearOpMode {
                             .lineToY(5)
                             .build(),
                     drive.actionBuilder(drive.pose)
-                            .lineToY(-5)
+                            .lineToY(-10)
                             .build(),
                     drive.actionBuilder(drive.pose)
                             .lineToY(10)

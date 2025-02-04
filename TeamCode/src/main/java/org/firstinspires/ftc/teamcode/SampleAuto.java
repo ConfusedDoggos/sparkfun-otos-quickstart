@@ -755,10 +755,10 @@ public class SampleAuto extends LinearOpMode {
         deliveryClaw.setPosition(dCClose);
     }
     private void initMotors() {
-        rightBack = hardwareMap.get(DcMotor.class, "rightBack");
-        leftBack = hardwareMap.get(DcMotor.class, "leftBack");
-        leftFront = hardwareMap.get(DcMotor.class, "leftFront");
-        rightFront = hardwareMap.get(DcMotor.class, "rightFront");
+        rightBack = hardwareMap.get(DcMotor.class, "right_back");
+        leftBack = hardwareMap.get(DcMotor.class, "left_back");
+        leftFront = hardwareMap.get(DcMotor.class, "left_front");
+        rightFront = hardwareMap.get(DcMotor.class, "right_front");
         horizontalSlideMotor = hardwareMap.get(DcMotor.class, "horizontalSlideMotor");
         verticalSlideMotor = hardwareMap.get(DcMotor.class, "verticalSlideMotor");
         intakeClaw = hardwareMap.get(Servo.class, "intakeClaw");

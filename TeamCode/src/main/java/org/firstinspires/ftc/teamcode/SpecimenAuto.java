@@ -115,7 +115,7 @@ public class SpecimenAuto extends LinearOpMode {
     private Servo intakeArm;
     private Servo deliveryWrist;
     private Servo deliveryClaw;
-
+    public Pose2d RRPos;
 
     public class VerticalSlide {
         private DcMotorEx verticalSlideMotor;
@@ -644,6 +644,23 @@ public class SpecimenAuto extends LinearOpMode {
         }
 
     }
+    public class Roadrunner {
+
+        private Pose2d currentPos;
+
+        public class FindPose implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                RRPos = currentPos;
+                return false;
+            }
+        }
+        public Action findPose(Pose2d CurrentPos) {
+            currentPos = CurrentPos;
+            return new FindPose();
+        }
+
+    }
 
     public SpecimenAuto() {
     }
@@ -660,6 +677,7 @@ public class SpecimenAuto extends LinearOpMode {
         HorizontalSlide horizontalSlide = new HorizontalSlide(hardwareMap);
         DeliverySystem deliverySystem = new DeliverySystem(hardwareMap);
         IntakeSystem intakeSystem = new IntakeSystem(hardwareMap);
+        Roadrunner roadrunner = new Roadrunner();
 
         initMotors();
         initServos();
@@ -676,33 +694,39 @@ public class SpecimenAuto extends LinearOpMode {
                             new ParallelAction (
                                     drive.actionBuilder(drive.pose)
                                             .lineToY(lineToY1)
+                                            .stopAndAdd(roadrunner.findPose(drive.pose))
                                             .build(),
                                     verticalSlide.slideUp()
                             ),
                             deliverySystem.deliverToBar(),
                             new SleepAction(BarDeliverWait),
                             verticalSlide.slideDown(),
-                            drive.actionBuilder(drive.pose)
+                            drive.actionBuilder(RRPos)
                                     .lineToY(lineToY2)
+                                    .stopAndAdd(roadrunner.findPose(drive.pose))
                                     .build(),
 
                             //Push in sample to human player and pick up second
 
-                            drive.actionBuilder(drive.pose)
+                            drive.actionBuilder(RRPos)
                                     .strafeToLinearHeading(new Vector2d(strafeTo1X,strafeTo1Y),Math.toRadians(90),null,fastMode)
+                                    .stopAndAdd(roadrunner.findPose(drive.pose))
                                     .build(),
-                            drive.actionBuilder(drive.pose)
+                            drive.actionBuilder(RRPos)
                                     .turnTo(Math.toRadians(turnTo1))
+                                    .stopAndAdd(roadrunner.findPose(drive.pose))
                                     .build(),
-                            drive.actionBuilder(drive.pose)
+                            drive.actionBuilder(RRPos)
                                     .strafeToLinearHeading(new Vector2d(strafeTo2X,strafeTo2Y),Math.toRadians(270),null,fastMode)
                                     .strafeToLinearHeading(new Vector2d(strafeTo3X,strafeTo3Y),Math.toRadians(270),null,fastMode)
                                     .strafeToLinearHeading(new Vector2d(strafeTo4X,strafeTo4Y),Math.toRadians(270),null,fastMode)
+                                    .stopAndAdd(roadrunner.findPose(drive.pose))
                                     .build(),
-                            drive.actionBuilder(drive.pose)
+                            drive.actionBuilder(RRPos)
                                     .strafeTo(new Vector2d(strafeTo5X,strafeTo5Y))
+                                    .stopAndAdd(roadrunner.findPose(drive.pose))
                                     .build(),
-                            new SleepAction(1),
+                            new SleepAction(1)/*,
                             drive.actionBuilder(drive.pose)
                                     .turnTo(Math.toRadians(270))
                                     .lineToY(lineToY3,null,slowMode)
@@ -728,7 +752,7 @@ public class SpecimenAuto extends LinearOpMode {
                                             .lineToY(lineToY5)
                                             .build(),
                                     verticalSlide.slideDown()
-                            )
+                            )*/
                     ));
 
             telemetry.addData("posestimate",drive.pose);
@@ -744,10 +768,10 @@ public class SpecimenAuto extends LinearOpMode {
         deliveryClaw.setPosition(dCClose);
     }
     private void initMotors() {
-        rightBack = hardwareMap.get(DcMotor.class, "rightBack");
-        leftBack = hardwareMap.get(DcMotor.class, "leftBack");
-        leftFront = hardwareMap.get(DcMotor.class, "leftFront");
-        rightFront = hardwareMap.get(DcMotor.class, "rightFront");
+        rightBack = hardwareMap.get(DcMotor.class, "right_back");
+        leftBack = hardwareMap.get(DcMotor.class, "left_back");
+        leftFront = hardwareMap.get(DcMotor.class, "left_front");
+        rightFront = hardwareMap.get(DcMotor.class, "right_front");
         horizontalSlideMotor = hardwareMap.get(DcMotor.class, "horizontalSlideMotor");
         verticalSlideMotor = hardwareMap.get(DcMotor.class, "verticalSlideMotor");
         intakeClaw = hardwareMap.get(Servo.class, "intakeClaw");
