@@ -50,34 +50,51 @@ public class SpecimenAuto extends LinearOpMode {
     public static int verticalSlidePos;
     public static int horizontalSlidePos;
     public static double BucketDeliverWait = 1.8;
-    public static double BarDeliverWait = 1.5;
+    public static double BarDeliverWait = 0.5;
     public static double PickupWait = 1.7;
 
     public static double TransferWait = 1;
-    public static double RRInitPosX = 5;
+    public static double RRInitPosX = 0;
     public static double RRInitPosY = 62;
     public static double RRInitPosHeading = 90;
-    public static double lineToY1 = 33;
+    public static double lineToY1 = 31;
     public static double lineToY2 = 37;
-    public static double lineToY3 = 50;
-    public static double lineToY4 = 33;
+    public static double lineToY3 = 65;
+    public static double lineToY4 = 31;
     public static double lineToY5 = 40;
-    public static double strafeTo1X = -40;
+    public static double lineToY6 = 65;
+    public static double lineToY7 = 55;
+    public static double lineToY8 = 31;
+    public static double lineToY9 = 40;
+    public static double strafeTo1X = -35;
     public static double strafeTo1Y = 37;
-    public static double strafeTo2X = -40;
-    public static double strafeTo2Y = 23;
-    public static double strafeTo3X = -55;
-    public static double strafeTo3Y = 23;
-    public static double strafeTo4X = -55;
-    public static double strafeTo4Y = 55;
-    public static double strafeTo5X = -55;
-    public static double strafeTo5Y = 62;
+    public static double strafeTo2X = -35;
+    public static double strafeTo2Y = 20;
+    public static double strafeTo3X = -44;
+    public static double strafeTo3Y = 20;
+    public static double strafeTo4X = -42;
+    public static double strafeTo4Y = 52;
+    public static double strafeTo5X = -42;
+    public static double strafeTo5Y = 50;
     public static double turnTo1 = 270;
-    public static double setTangent2 = 270;
-    public static double splineTo1X = -40;
+    public static double turnTo2 = 90;
+    public static double turnTo3 = 270;
+    public static double turnTo4 = 90;
+    public static double setTangent1 = 270;
+    public static double setTangent2 = 90;
+    public static double setTangent3 = 270;
+    public static double splineTo1X = -3;
     public static double splineTo1Y = 40;
-    public static double splineTo1Heading = 90;
+    public static double splineTo1Heading = 270;
     public static double splineTo1Tangent = 270;
+    public static double splineTo2X = -42;
+    public static double splineTo2Y = 50;
+    public static double splineTo2Heading = 270;
+    public static double splineTo2Tangent = 90;
+    public static double splineTo3X = 4;
+    public static double splineTo3Y = 40;
+    public static double splineTo3Heading = 270;
+    public static double splineTo3Tangent = 270;
 //    public static double splineTo2X = -35;
 //    public static double splineTo2Y = 58;
 //    public static double splineTo2Heading = 270;
@@ -89,18 +106,19 @@ public class SpecimenAuto extends LinearOpMode {
     public static int HorizontalExtensionTicks = 210;
     public static int HorizontalRetractionTicks = 2;
     public static double HorizontalMotorSpeed = 400;
-    public static double VerticalMotorSpeed = 1200;
+    public static double VerticalMotorSpeed = 1400;
     public static int VerticalExtensionTicks = 1400;
     public static int VerticalScoringTicks = 1500;
     public static int VerticalRetractionTicks = 5;
     public static int TransferDelay1 = 250;
     public static int TransferDelay2 = 500;
+    public static double HumanPlayerWait = 1;
     public static int PickUpDelay1 = 300;
     public static int PickUpDelay2 = 800;
     public static boolean PickupWithContact = false;
     public static int ForwardTimeForPickup = 400;
-    public ProfileAccelConstraint fastMode = new ProfileAccelConstraint(-70,100);
-    public ProfileAccelConstraint slowMode = new ProfileAccelConstraint(-20,20);
+    public ProfileAccelConstraint fastMode = new ProfileAccelConstraint(-80,50);
+    public ProfileAccelConstraint slowMode = new ProfileAccelConstraint(-30,30);
 
 
     // public static int target;
@@ -115,7 +133,6 @@ public class SpecimenAuto extends LinearOpMode {
     private Servo intakeArm;
     private Servo deliveryWrist;
     private Servo deliveryClaw;
-    public Pose2d RRPos;
 
     public class VerticalSlide {
         private DcMotorEx verticalSlideMotor;
@@ -395,7 +412,6 @@ public class SpecimenAuto extends LinearOpMode {
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                dW.setPosition(dWDeliverSpecimen);
                 new Timer().schedule(
                         new java.util.TimerTask() {
                             @Override
@@ -403,7 +419,7 @@ public class SpecimenAuto extends LinearOpMode {
                                 verticalSlideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                                 verticalSlideMotor.setPower(-0.7);
                             }
-                        },1100
+                        },0
                 );
                 new Timer().schedule(
                         new java.util.TimerTask() {
@@ -428,7 +444,7 @@ public class SpecimenAuto extends LinearOpMode {
                                         },50
                                 );
                             }
-                        },1200
+                        },400
                 );
                 return false;
 
@@ -670,14 +686,16 @@ public class SpecimenAuto extends LinearOpMode {
         if (opModeIsActive() && !isStopRequested()) {
 
             //Deliver first specimen and back up for reset
-
+            horizontalSlideMotor.setPower(-0.4);
             Actions.runBlocking(
                     new SequentialAction (
                             new ParallelAction (
                                     drive.actionBuilder(initialPose)
+                                            .waitSeconds(0.3)
                                             .lineToY(lineToY1)
                                             .build(),
-                                    verticalSlide.slideUp()
+                                    verticalSlide.slideUp(),
+                                    deliverySystem.deliveryWristBack()
                             ),
                             deliverySystem.deliverToBar(),
                             new SleepAction(BarDeliverWait),
@@ -696,15 +714,14 @@ public class SpecimenAuto extends LinearOpMode {
                                     .build(),
                             drive.actionBuilder(new Pose2d(strafeTo1X,strafeTo1Y,Math.toRadians(turnTo1)))
                                     .strafeToLinearHeading(new Vector2d(strafeTo2X,strafeTo2Y),Math.toRadians(270),null,fastMode)
-                                    .strafeToLinearHeading(new Vector2d(strafeTo3X,strafeTo3Y),Math.toRadians(270),null,fastMode)
+                                    .strafeToLinearHeading(new Vector2d(strafeTo3X,strafeTo3Y),Math.toRadians(270)/*,null,fastMode*/)
                                     .strafeToLinearHeading(new Vector2d(strafeTo4X,strafeTo4Y),Math.toRadians(270),null,fastMode)
                                     .build(),
                             drive.actionBuilder(new Pose2d(strafeTo4X,strafeTo4Y,Math.toRadians(turnTo1)))
                                     .strafeTo(new Vector2d(strafeTo5X,strafeTo5Y))
                                     .build(),
-                            new SleepAction(1)/*,
-                            drive.actionBuilder(drive.pose)
-                                    .turnTo(Math.toRadians(270))
+                            new SleepAction(HumanPlayerWait),
+                            drive.actionBuilder(new Pose2d(strafeTo5X,strafeTo5Y,Math.toRadians(turnTo1)))
                                     .lineToY(lineToY3,null,slowMode)
                                     .build(),
                             deliverySystem.closeDeliveryClaw(),
@@ -713,26 +730,49 @@ public class SpecimenAuto extends LinearOpMode {
 
                             new ParallelAction(
                                     verticalSlide.slideUp(),
-                                    drive.actionBuilder(drive.pose)
-                                            .setTangent(setTangent2)
+                                    drive.actionBuilder(new Pose2d(strafeTo5X,lineToY3,Math.toRadians(turnTo1)))
+                                            .setTangent(Math.toRadians(setTangent1))
                                             .splineToLinearHeading(new Pose2d(splineTo1X,splineTo1Y,Math.toRadians(splineTo1Heading)),Math.toRadians(splineTo1Tangent))
+                                            .turnTo(Math.toRadians(turnTo2))
                                             .build()
                             ),
-                            drive.actionBuilder(drive.pose)
+                            drive.actionBuilder(new Pose2d(splineTo1X,splineTo1Y,Math.toRadians(turnTo2)))
                                     .lineToY(lineToY4)
                                     .build(),
                             deliverySystem.deliverToBar(),
                             new SleepAction(BarDeliverWait),
                             new ParallelAction (
-                                    drive.actionBuilder(drive.pose)
+                                    drive.actionBuilder(new Pose2d(splineTo1X,lineToY4,Math.toRadians(turnTo2)))
                                             .lineToY(lineToY5)
                                             .build(),
                                     verticalSlide.slideDown()
-                            )*/
-                    ));
+                            ),
 
-            telemetry.addData("posestimate",drive.pose);
-            telemetry.update();
+                            drive.actionBuilder(new Pose2d(splineTo1X,lineToY5,Math.toRadians(turnTo2)))
+                                    .turnTo(Math.toRadians(turnTo3))
+                                    .setTangent(Math.toRadians(setTangent2))
+                                    .splineToLinearHeading(new Pose2d(splineTo2X,splineTo2Y,Math.toRadians(turnTo3)),Math.toRadians(splineTo2Tangent))
+                                    .lineToY(lineToY6,null,slowMode)
+                                    .build(),
+                            deliverySystem.closeDeliveryClaw(),
+                            new ParallelAction(
+                                    drive.actionBuilder(new Pose2d(splineTo2X,lineToY6,Math.toRadians(turnTo3)))
+                                            .lineToY(lineToY7)
+                                            .setTangent(Math.toRadians(setTangent3))
+                                            .splineToLinearHeading(new Pose2d(splineTo3X,splineTo3Y,Math.toRadians(turnTo3)),Math.toRadians(splineTo3Tangent))
+                                            .turnTo(Math.toRadians(turnTo4))
+                                            .lineToY(lineToY8)
+                                            .build(),
+                                    verticalSlide.slideUp()
+                                    ),
+                            deliverySystem.deliverToBar(),
+                            verticalSlide.slideDown(),
+                            drive.actionBuilder(new Pose2d(splineTo3X,lineToY8,Math.toRadians(turnTo4)))
+                                    .lineToY(lineToY9)
+                                    .build()
+                    ));
+            time = getRuntime();
+            telemetry.addData("Time to completion",time);
         }
     }
 
