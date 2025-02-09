@@ -748,6 +748,8 @@ public class SpecimenAuto extends LinearOpMode {
                                     verticalSlide.slideDown()
                             ),
 
+                            //Pick up third specimen
+
                             drive.actionBuilder(new Pose2d(splineTo1X,lineToY5,Math.toRadians(turnTo2)))
                                     .turnTo(Math.toRadians(turnTo3))
                                     .setTangent(Math.toRadians(setTangent2))
@@ -755,6 +757,9 @@ public class SpecimenAuto extends LinearOpMode {
                                     .lineToY(lineToY6,null,slowMode)
                                     .build(),
                             deliverySystem.closeDeliveryClaw(),
+
+                            //Score third specimen
+
                             new ParallelAction(
                                     drive.actionBuilder(new Pose2d(splineTo2X,lineToY6,Math.toRadians(turnTo3)))
                                             .lineToY(lineToY7)

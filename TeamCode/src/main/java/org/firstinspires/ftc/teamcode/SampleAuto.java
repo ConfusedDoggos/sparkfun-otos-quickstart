@@ -47,7 +47,7 @@ public class SampleAuto extends LinearOpMode {
     public static double BucketDeliverWait = 1.8;
     public static double BarDeliverWait = 1.5;
     public static double PickupWait = 1.7;
-    public static double TransferWait = 1;
+    public static double TransferWait = 0.5;
 
     public static double RRInitPosX = 42;
     public static double RRInitPosY = 60;
@@ -90,9 +90,9 @@ public class SampleAuto extends LinearOpMode {
     public static int VerticalScoringTicks = 1500;
     public static int VerticalRetractionTicks = 5;
     public static int TransferDelay1 = 250;
-    public static int TransferDelay2 = 500;
+    public static int TransferDelay2 = 150;
     public static int PickUpDelay1 = 300;
-    public static int PickUpDelay2 = 800;
+    public static int PickUpDelay2 = 400;
     public static boolean PickupWithContact = false;
     public static int ForwardTimeForPickup = 400;
 
@@ -538,6 +538,16 @@ public class SampleAuto extends LinearOpMode {
         public Action intakeArmUp() {
             return new IntakeArmUp();
         }
+        public class IntakeArmReady implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                iA.setPosition(iAReady);
+                return false;
+            }
+        }
+        public Action intakeArmReady() {
+            return new IntakeArmReady();
+        }
         public class IntakeArmDown implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
@@ -666,6 +676,9 @@ public class SampleAuto extends LinearOpMode {
 
             Actions.runBlocking(
                     new SequentialAction (
+
+                            //Score first specimen
+
                             new ParallelAction(
                                     drive.actionBuilder(initialPose)
                                             .setTangent(Math.toRadians(setTangent1))
@@ -676,66 +689,81 @@ public class SampleAuto extends LinearOpMode {
                             ),
                             deliverySystem.deliverToBucket(),
                             new SleepAction (BucketDeliverWait),
+
+                            //Move to pick up second sample
+
                             new ParallelAction(
-                                    new SequentialAction(
-                                            drive.actionBuilder(drive.pose)
+                                    drive.actionBuilder(new Pose2d(splineToX1,splineToY1,Math.toRadians(turnToHeading1)))
                                                     .lineToX(lineToX1)
-                                                    .build(),
-                                            drive.actionBuilder(drive.pose)
                                                     .turnTo(Math.toRadians(turnToHeading2))
-                                                    .strafeToConstantHeading(new Vector2d(strafeToX1, strafeToY1))
-                                                    .build()
-                                    ),
+                                                    .strafeTo(new Vector2d(strafeToX1, strafeToY1))
+                                                    .build(),
                                     verticalSlide.slideDown(),
                                     deliverySystem.openDeliveryClaw()
                             ),
+
+                            //Pick up second sample
+
+                            intakeSystem.intakeArmReady(),
                             horizontalSlide.slideForward(),
                             intakeSystem.pickUpSample(),
                             new SleepAction (PickupWait),
                             horizontalSlide.slideBack(),
                             intakeSystem.transferToDelivery(),
                             new SleepAction(TransferWait),
+
+                            //Score second sample
+
                             new ParallelAction(
-                                    drive.actionBuilder(drive.pose)
+                                    drive.actionBuilder(new Pose2d(strafeToX1,strafeToY1,Math.toRadians(turnToHeading2)))
                                             .setTangent(Math.toRadians(setTangent2))
-                                            .splineToConstantHeading(new Vector2d(splineToX2, splineToY2), Math.toRadians(splineToHeading2))
+                                            .splineTo(new Vector2d(splineToX2, splineToY2), Math.toRadians(splineToHeading2))
                                             .turnTo(Math.toRadians(turnToHeading3))
                                             .build(),
                                     verticalSlide.slideUp()
                             ),
                             deliverySystem.deliverToBucket(),
                             new SleepAction(BucketDeliverWait),
+
+                            //Move to pick up third sample
+
                             new ParallelAction(
-                                    new SequentialAction(
-                                            drive.actionBuilder(drive.pose)
+                                            drive.actionBuilder(new Pose2d(splineToX2,splineToY2,Math.toRadians(turnToHeading3)))
                                                     .lineToX(lineToX2)
-                                                    .build(),
-                                            drive.actionBuilder(drive.pose)
                                                     .turnTo(Math.toRadians(turnToHeading4))
                                                     .strafeToConstantHeading(new Vector2d(strafeToX2, strafeToY2))
-                                                    .build()
-                                    ),
+                                                    .build(),
                                     verticalSlide.slideDown(),
                                     deliverySystem.openDeliveryClaw()
                             ),
+
+                            //Pick up third sample
+
+                            intakeSystem.intakeArmReady(),
                             horizontalSlide.slideForward(),
                             intakeSystem.pickUpSample(),
                             new SleepAction(PickupWait),
                             horizontalSlide.slideBack(),
                             intakeSystem.transferToDelivery(),
                             new SleepAction(TransferWait),
+
+                            //Score third sample
+
                             new ParallelAction(
-                                    drive.actionBuilder(drive.pose)
+                                    drive.actionBuilder(new Pose2d(strafeToX2,strafeToY2,Math.toRadians(turnToHeading4)))
                                             .setTangent(Math.toRadians(setTangent3))
-                                            .splineToConstantHeading(new Vector2d(splineToX3, splineToY3), Math.toRadians(splineToHeading3))
+                                            .splineTo(new Vector2d(splineToX3, splineToY3), Math.toRadians(splineToHeading3))
                                             .turnTo(Math.toRadians(turnToHeading5))
                                             .build(),
                                     verticalSlide.slideUp()
                             ),
                             deliverySystem.deliverToBucket(),
                             new SleepAction(BucketDeliverWait),
+
+                            //Retreat
+
                             new ParallelAction(
-                                    drive.actionBuilder(drive.pose)
+                                    drive.actionBuilder(new Pose2d(splineToX3,splineToY3,Math.toRadians(turnToHeading5)))
                                             .lineToX(lineToX3)
                                             .build(),
                                     verticalSlide.slideDown()
