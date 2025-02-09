@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import java.util.Timer;
 
 @Config
-@TeleOp(name = "intoTheDeepTeleAS2", group = "TeleOp")
+@TeleOp(name = "AS_TeleOp", group = "TeleOp")
 public class AS_TeleOp extends LinearOpMode {
     public static double iCOpen = 0.7;
     public static double iCClose = 0.55;

@@ -78,13 +78,13 @@ public class MecanumDrive {
         public double maxProfileAccel = 50;
 
         // turn profile parameters (in radians)
-        public double maxAngVel = Math.PI * 3/4; // shared with path
-        public double maxAngAccel = Math.PI * 3/4;
+        public double maxAngVel = Math.toRadians(270); // shared with path
+        public double maxAngAccel = Math.toRadians(270);
 
         // path controller gains
         public double axialGain = 4;
-        public double lateralGain = 10;
-        public double headingGain = 10; // shared with turn
+        public double lateralGain = 4;
+        public double headingGain = 13; // shared with turn
 
         public double axialVelGain = 0.0;
         public double lateralVelGain = 0.0;

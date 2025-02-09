@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.tuning;
 
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -8,6 +9,10 @@ import org.firstinspires.ftc.teamcode.*;
 
 public final class ManualFeedbackTuner extends LinearOpMode {
     public static double DISTANCE = 64;
+    public static double TURNDISTANCE = 180;
+    public static boolean FORWARDS = false;
+    public static boolean SIDEWAYS = true;
+    public static boolean TURN = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -17,11 +22,25 @@ public final class ManualFeedbackTuner extends LinearOpMode {
             waitForStart();
 
             while (opModeIsActive()) {
-                Actions.runBlocking(
-                        drive.actionBuilder(new Pose2d(0, 0, 0))
-                                .lineToX(DISTANCE)
-                                .lineToX(0)
-                                .build());
+                if (FORWARDS) {
+                    Actions.runBlocking(
+                            drive.actionBuilder(new Pose2d(0, 0, 0))
+                                    .lineToX(DISTANCE)
+                                    .lineToX(0)
+                                    .build());
+                } else if (SIDEWAYS) {
+                    Actions.runBlocking(
+                            drive.actionBuilder(new Pose2d(0, 0, 0))
+                                    .strafeTo(new Vector2d(0,DISTANCE))
+                                    .strafeTo(new Vector2d(0,0))
+                                    .build());
+                } else if (TURN) {
+                    Actions.runBlocking(
+                            drive.actionBuilder(new Pose2d(0, 0, 0))
+                                    .turnTo(Math.toRadians(TURNDISTANCE))
+                                    .turnTo(Math.toRadians(0))
+                                    .build());
+                }
             }
         } else if (TuningOpModes.DRIVE_CLASS.equals(SparkFunOTOSDrive.class)) {
             SparkFunOTOSDrive drive = new SparkFunOTOSDrive(hardwareMap, new Pose2d(0, 0, 0));
@@ -71,11 +90,13 @@ public final class ManualFeedbackTuner extends LinearOpMode {
             waitForStart();
 
             while (opModeIsActive()) {
-                Actions.runBlocking(
-                        drive.actionBuilder(new Pose2d(0, 0, 0))
-                                .lineToX(DISTANCE)
-                                .lineToX(0)
-                                .build());
+                if (FORWARDS) {
+                    Actions.runBlocking(
+                            drive.actionBuilder(new Pose2d(0, 0, 0))
+                                    .lineToX(DISTANCE)
+                                    .lineToX(0)
+                                    .build());
+                }
             }
         } else {
             throw new RuntimeException();
