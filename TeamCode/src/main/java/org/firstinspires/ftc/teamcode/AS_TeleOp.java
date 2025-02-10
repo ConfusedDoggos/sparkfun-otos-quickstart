@@ -35,6 +35,7 @@ public class AS_TeleOp extends LinearOpMode {
     public boolean xToggle = false;
     public boolean yToggle = false;
     public boolean isDeliveryOpen = false;
+    public boolean isForwards = false;
     public double deliveryWristPosition;
     boolean isIntakeOpen;
     private DcMotor rightBack;
@@ -70,10 +71,10 @@ public class AS_TeleOp extends LinearOpMode {
      */
     @Override
     public void runOpMode() {
-        rightBack = hardwareMap.get(DcMotor.class, "rightBack");
-        leftBack = hardwareMap.get(DcMotor.class, "leftBack");
-        leftFront = hardwareMap.get(DcMotor.class, "leftFront");
-        rightFront = hardwareMap.get(DcMotor.class, "rightFront");
+        rightBack = hardwareMap.get(DcMotor.class, "right_back");
+        leftBack = hardwareMap.get(DcMotor.class, "left_back");
+        leftFront = hardwareMap.get(DcMotor.class, "left_front");
+        rightFront = hardwareMap.get(DcMotor.class, "right_front");
         horizontalSlideMotor = hardwareMap.get(DcMotor.class, "horizontalSlideMotor");
         verticalSlideMotor = hardwareMap.get(DcMotor.class, "verticalSlideMotor");
         intakeClaw = hardwareMap.get(Servo.class, "intakeClaw");
@@ -212,7 +213,28 @@ public class AS_TeleOp extends LinearOpMode {
                     intakeWrist.setPosition(intakeWristTargetPos);
                 }
                 horizPos = horizontalSlideMotor.getCurrentPosition();
-                horizontalSlideMotor.setPower(-0.3 * gamepad1.left_stick_y);
+                if (gamepad1.left_stick_y < 0) {
+                    isForwards = true;
+                } else {
+                    isForwards = false;
+                }
+                if (isForwards) {
+                    if (horizPos < 90) {
+                        horizontalSlideMotor.setPower(-0.35 * gamepad1.left_stick_y);
+                    } else if (horizPos < 240) {
+                        horizontalSlideMotor.setPower(-0.6 * gamepad1.left_stick_y);
+                    } else {
+                        horizontalSlideMotor.setPower(-0.3 * gamepad1.left_stick_y);
+                    }
+                } else {
+                    if (horizPos < 90) {
+                        horizontalSlideMotor.setPower(-0.3 * gamepad1.left_stick_y);
+                    } else if (horizPos < 220) {
+                        horizontalSlideMotor.setPower(-0.3 * gamepad1.left_stick_y);
+                    } else {
+                        horizontalSlideMotor.setPower(-0.5 * gamepad1.left_stick_y);
+                    }
+                }
                 toggleVariables();
                 vertPos = verticalSlideMotor.getCurrentPosition();
                 telemetry.addData("vertSlidePos", vertPos);

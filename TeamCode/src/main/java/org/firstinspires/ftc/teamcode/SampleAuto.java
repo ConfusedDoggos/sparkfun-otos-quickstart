@@ -11,6 +11,7 @@ import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.VelConstraint;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -38,33 +39,33 @@ public class SampleAuto extends LinearOpMode {
     public static double iAReady = 0.5;
     public static double dCOpen = 0.5;
     public static double dCClose = 0.35;
-    public static double dWTransfer = 0.95;
+    public static double dWTransfer = 1;
     public static double dWDeliverBucket = 0.2;
     public static double dWDeliverSpecimen = 0;
-    public static double dWStartPos = 0.5;
+    public static double dWStartPos = 0.8;
     public static int verticalSlidePos;
     public static int horizontalSlidePos;
     public static double BucketDeliverWait = 1.8;
     public static double BarDeliverWait = 1.5;
-    public static double PickupWait = 1.7;
+    public static double PickupWait = 1.5;
     public static double TransferWait = 0.5;
 
-    public static double RRInitPosX = 42;
-    public static double RRInitPosY = 60;
+    public static double RRInitPosX = 37;
+    public static double RRInitPosY = 61;
     public static double RRInitPosHeading = 180;
 
     public static double setTangent1 = 0;
     public static double setTangent2 = 270;
     public static double setTangent3 = 90;
 
-    public static double splineToX1 = 51;
-    public static double splineToY1 = 51;
+    public static double splineToX1 = 55;
+    public static double splineToY1 = 57;
     public static double splineToHeading1 = 45;
-    public static double splineToX2 = 51;
-    public static double splineToY2 = 51;
+    public static double splineToX2 = 54;
+    public static double splineToY2 = 54;
     public static double splineToHeading2 = 45;
-    public static double splineToX3 = 51;
-    public static double splineToY3 = 51;
+    public static double splineToX3 = 54;
+    public static double splineToY3 = 54;
 
     public static double splineToHeading3 = 45;
     public static double turnToHeading1 = 225;
@@ -77,16 +78,16 @@ public class SampleAuto extends LinearOpMode {
     public static double lineToX2 = 48;
     public static double lineToX3 = 48;
 
-    public static double strafeToX1 = 39.25;
-    public static double strafeToY1 = 40;
-    public static double strafeToX2 = 53.25;
-    public static double strafeToY2 = 43;
+    public static double strafeToX1 = 46;
+    public static double strafeToY1 = 36.5;
+    public static double strafeToX2 = 56;
+    public static double strafeToY2 = 36.5;
 
-    public static int HorizontalExtensionTicks = 210;
-    public static int HorizontalRetractionTicks = 2;
+    public static int HorizontalExtensionTicks = 90;
+    public static int HorizontalRetractionTicks = 3;
     public static double HorizontalMotorSpeed = 400;
-    public static double VerticalMotorSpeed = 1200;
-    public static int VerticalExtensionTicks = 1400;
+    public static double VerticalMotorSpeed = 1500;
+    public static int VerticalExtensionTicks = 3000;
     public static int VerticalScoringTicks = 1500;
     public static int VerticalRetractionTicks = 5;
     public static int TransferDelay1 = 250;
@@ -95,8 +96,7 @@ public class SampleAuto extends LinearOpMode {
     public static int PickUpDelay2 = 400;
     public static boolean PickupWithContact = false;
     public static int ForwardTimeForPickup = 400;
-
-    // public static int target;
+    public ProfileAccelConstraint slowMode = new ProfileAccelConstraint(-40,35);
     private DcMotor rightBack;
     private DcMotor leftBack;
     private DcMotor leftFront;
@@ -233,6 +233,7 @@ public class SampleAuto extends LinearOpMode {
                 } else {
                     // false stops action rerun
                     horizontalSlideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    horizontalSlideMotor.setPower(0);
                     return false;
                 }
                 // overall, the action powers the lift until it surpasses
@@ -264,11 +265,14 @@ public class SampleAuto extends LinearOpMode {
                     return true;
                 } else {
                     // false stops action rerun
+                    horizontalSlideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    horizontalSlideMotor.setPower(-0.4);
                     new Timer().schedule(
                             new java.util.TimerTask() {
                                 @Override
                                 public void run() {
-                                    horizontalSlideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);                                }
+                                    //horizontalSlideMotor.setPower(0);
+                                }
                             },1000
                     );
                     return false;
@@ -682,7 +686,7 @@ public class SampleAuto extends LinearOpMode {
                             new ParallelAction(
                                     drive.actionBuilder(initialPose)
                                             .setTangent(Math.toRadians(setTangent1))
-                                            .splineToConstantHeading(new Vector2d(splineToX1, splineToY1), Math.toRadians(splineToHeading1))
+                                            .splineToConstantHeading(new Vector2d(splineToX1, splineToY1), Math.toRadians(splineToHeading1),null,slowMode)
                                             .turnTo(Math.toRadians(turnToHeading1))
                                             .build(),
                                     verticalSlide.slideUp()
@@ -705,6 +709,7 @@ public class SampleAuto extends LinearOpMode {
                             //Pick up second sample
 
                             intakeSystem.intakeArmReady(),
+                            new SleepAction(0.5),
                             horizontalSlide.slideForward(),
                             intakeSystem.pickUpSample(),
                             new SleepAction (PickupWait),
@@ -717,8 +722,8 @@ public class SampleAuto extends LinearOpMode {
                             new ParallelAction(
                                     drive.actionBuilder(new Pose2d(strafeToX1,strafeToY1,Math.toRadians(turnToHeading2)))
                                             .setTangent(Math.toRadians(setTangent2))
-                                            .splineTo(new Vector2d(splineToX2, splineToY2), Math.toRadians(splineToHeading2))
-                                            .turnTo(Math.toRadians(turnToHeading3))
+                                            .splineToLinearHeading(new Pose2d(splineToX2, splineToY2,Math.toRadians(turnToHeading3)), Math.toRadians(splineToHeading2),null,slowMode)
+                                            //.turnTo(Math.toRadians(turnToHeading3))
                                             .build(),
                                     verticalSlide.slideUp()
                             ),
@@ -740,6 +745,7 @@ public class SampleAuto extends LinearOpMode {
                             //Pick up third sample
 
                             intakeSystem.intakeArmReady(),
+                            new SleepAction(0.5),
                             horizontalSlide.slideForward(),
                             intakeSystem.pickUpSample(),
                             new SleepAction(PickupWait),
@@ -752,8 +758,8 @@ public class SampleAuto extends LinearOpMode {
                             new ParallelAction(
                                     drive.actionBuilder(new Pose2d(strafeToX2,strafeToY2,Math.toRadians(turnToHeading4)))
                                             .setTangent(Math.toRadians(setTangent3))
-                                            .splineTo(new Vector2d(splineToX3, splineToY3), Math.toRadians(splineToHeading3))
-                                            .turnTo(Math.toRadians(turnToHeading5))
+                                            .splineToLinearHeading(new Pose2d(splineToX3, splineToY3,Math.toRadians(turnToHeading5)), Math.toRadians(splineToHeading3),null,slowMode)
+                                            //.turnTo(Math.toRadians(turnToHeading5))
                                             .build(),
                                     verticalSlide.slideUp()
                             ),
