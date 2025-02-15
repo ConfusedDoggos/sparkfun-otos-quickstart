@@ -35,7 +35,7 @@ public class SpecimenAuto extends LinearOpMode {
     public static double iCOpen = 0.7;
     public static double iCClose = 0.55;
     public static double iCAlign = 0.57;
-    public static double iWTransferPos = 0.84;
+    public static double iWTransferPos = 0.5;
     public static double iWAlteredPos = 0;
     public static double iWAlignmentPos = 0;
     public static double iAUp = 0;
@@ -95,7 +95,9 @@ public class SpecimenAuto extends LinearOpMode {
     public static double splineTo3Y = 40;
     public static double splineTo3Heading = 270;
     public static double splineTo3Tangent = 270;
-//    public static double splineTo2X = -35;
+    public static double parkX = -42;
+    public static double parkY = 50;
+    //    public static double splineTo2X = -35;
 //    public static double splineTo2Y = 58;
 //    public static double splineTo2Heading = 270;
 //    public static double splineTo2Tangent = 90;
@@ -780,6 +782,7 @@ public class SpecimenAuto extends LinearOpMode {
                             verticalSlide.slideDown(),
                             drive.actionBuilder(new Pose2d(splineTo3X,lineToY8,Math.toRadians(turnTo4)))
                                     .lineToY(lineToY9)
+                                    .strafeTo(new Vector2d(parkX,parkY),null,fastMode)
                                     .build()
                     ));
             time = getRuntime();

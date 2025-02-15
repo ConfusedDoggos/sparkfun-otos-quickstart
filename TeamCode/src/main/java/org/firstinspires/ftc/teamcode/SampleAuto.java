@@ -31,7 +31,7 @@ public class SampleAuto extends LinearOpMode {
     public static double iCOpen = 0.7;
     public static double iCClose = 0.55;
     public static double iCAlign = 0.57;
-    public static double iWTransferPos = 0.84;
+    public static double iWTransferPos = 0.5;
     public static double iWAlteredPos = 0;
     public static double iWAlignmentPos = 0;
     public static double iAUp = 0;
@@ -64,8 +64,8 @@ public class SampleAuto extends LinearOpMode {
     public static double splineToX2 = 54;
     public static double splineToY2 = 54;
     public static double splineToHeading2 = 45;
-    public static double splineToX3 = 54;
-    public static double splineToY3 = 54;
+    public static double splineToX3 = 55;
+    public static double splineToY3 = 55;
 
     public static double splineToHeading3 = 45;
     public static double turnToHeading1 = 225;
@@ -78,10 +78,10 @@ public class SampleAuto extends LinearOpMode {
     public static double lineToX2 = 48;
     public static double lineToX3 = 48;
 
-    public static double strafeToX1 = 46;
-    public static double strafeToY1 = 36.5;
-    public static double strafeToX2 = 56;
-    public static double strafeToY2 = 36.5;
+    public static double strafeToX1 = 47.5;
+    public static double strafeToY1 = 38;
+    public static double strafeToX2 = 57;
+    public static double strafeToY2 = 37;
 
     public static int HorizontalExtensionTicks = 90;
     public static int HorizontalRetractionTicks = 3;
@@ -686,7 +686,7 @@ public class SampleAuto extends LinearOpMode {
                             new ParallelAction(
                                     drive.actionBuilder(initialPose)
                                             .setTangent(Math.toRadians(setTangent1))
-                                            .splineToConstantHeading(new Vector2d(splineToX1, splineToY1), Math.toRadians(splineToHeading1),null,slowMode)
+                                            .splineToConstantHeading(new Vector2d(splineToX1, splineToY1), Math.toRadians(splineToHeading1))
                                             .turnTo(Math.toRadians(turnToHeading1))
                                             .build(),
                                     verticalSlide.slideUp()
@@ -700,16 +700,17 @@ public class SampleAuto extends LinearOpMode {
                                     drive.actionBuilder(new Pose2d(splineToX1,splineToY1,Math.toRadians(turnToHeading1)))
                                                     .lineToX(lineToX1)
                                                     .turnTo(Math.toRadians(turnToHeading2))
-                                                    .strafeTo(new Vector2d(strafeToX1, strafeToY1))
+                                                    .strafeTo(new Vector2d(strafeToX1, strafeToY1),null,slowMode)
                                                     .build(),
                                     verticalSlide.slideDown(),
-                                    deliverySystem.openDeliveryClaw()
+                                    deliverySystem.openDeliveryClaw(),
+                                    horizontalSlide.slideBack()
                             ),
 
                             //Pick up second sample
 
                             intakeSystem.intakeArmReady(),
-                            new SleepAction(0.5),
+                            new SleepAction(0.2),
                             horizontalSlide.slideForward(),
                             intakeSystem.pickUpSample(),
                             new SleepAction (PickupWait),
@@ -722,7 +723,7 @@ public class SampleAuto extends LinearOpMode {
                             new ParallelAction(
                                     drive.actionBuilder(new Pose2d(strafeToX1,strafeToY1,Math.toRadians(turnToHeading2)))
                                             .setTangent(Math.toRadians(setTangent2))
-                                            .splineToLinearHeading(new Pose2d(splineToX2, splineToY2,Math.toRadians(turnToHeading3)), Math.toRadians(splineToHeading2),null,slowMode)
+                                            .splineToLinearHeading(new Pose2d(splineToX2, splineToY2,Math.toRadians(turnToHeading3)), Math.toRadians(splineToHeading2))
                                             //.turnTo(Math.toRadians(turnToHeading3))
                                             .build(),
                                     verticalSlide.slideUp()
@@ -736,16 +737,17 @@ public class SampleAuto extends LinearOpMode {
                                             drive.actionBuilder(new Pose2d(splineToX2,splineToY2,Math.toRadians(turnToHeading3)))
                                                     .lineToX(lineToX2)
                                                     .turnTo(Math.toRadians(turnToHeading4))
-                                                    .strafeToConstantHeading(new Vector2d(strafeToX2, strafeToY2))
+                                                    .strafeToConstantHeading(new Vector2d(strafeToX2, strafeToY2),null,slowMode)
                                                     .build(),
                                     verticalSlide.slideDown(),
-                                    deliverySystem.openDeliveryClaw()
+                                    deliverySystem.openDeliveryClaw(),
+                                    horizontalSlide.slideBack()
                             ),
 
                             //Pick up third sample
 
                             intakeSystem.intakeArmReady(),
-                            new SleepAction(0.5),
+                            new SleepAction(0.2),
                             horizontalSlide.slideForward(),
                             intakeSystem.pickUpSample(),
                             new SleepAction(PickupWait),

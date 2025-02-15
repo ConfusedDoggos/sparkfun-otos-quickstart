@@ -15,7 +15,7 @@ public class AS_TeleOp extends LinearOpMode {
     public static double iCOpen = 0.7;
     public static double iCClose = 0.55;
     public static double iCAlign = 0.57;
-    public static double iWTransferPos = 0.84;
+    public static double iWTransferPos = 0.5;
     public static double iWAlteredPos = 0;
     public static double iWAlignmentPos = 0;
     public static double iAUp = 0;
@@ -174,7 +174,7 @@ public class AS_TeleOp extends LinearOpMode {
                     deliveryClaw.setPosition(dCOpen);
                     isDeliveryOpen = true;
                     intakeWrist.setPosition(iWTransferPos);
-                    intakeWristTargetPos = 0.84;
+                    intakeWristTargetPos = 0.5;
                 } else if (gamepad1.dpad_down && !dpadDownToggle) {
                     downCounter += 1;
                     dpadDownToggle = true;
@@ -203,7 +203,7 @@ public class AS_TeleOp extends LinearOpMode {
                     if (gamepad1.left_trigger > 0.1) {
                         intakeWristTargetPos += 0.01 * gamepad1.left_trigger;
                     } else if (gamepad1.right_trigger > 0.1) {
-                        intakeWristTargetPos -= 0.005 * gamepad1.right_trigger;
+                        intakeWristTargetPos -= 0.01 * gamepad1.right_trigger;
                     }
                     if (intakeWristTargetPos > 1) {
                         intakeWristTargetPos = 1;
@@ -317,7 +317,7 @@ public class AS_TeleOp extends LinearOpMode {
     private void initServoModes() {
         intakeClaw.setPosition(iCClose);
         isIntakeOpen = false;
-        intakeWristTargetPos = 0.84;
+        intakeWristTargetPos = 0.5;
         intakeWrist.setPosition(intakeWristTargetPos);
         intakeArm.setPosition(iAUp);
         deliveryWrist.setPosition(dWStartPos);
