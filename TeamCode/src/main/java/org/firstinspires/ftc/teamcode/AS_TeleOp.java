@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.transition.Slide;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -29,21 +32,28 @@ public class AS_TeleOp extends LinearOpMode {
     public static double dWStartPos = 0.8;
     public static int TransferDelay1 = 250;
     public static int TransferDelay2 = 500;
+    public static int bucketTicks = 3000;
+    public static int highBarTicks = 1275;
     public boolean dpadDownToggle = false;
     public boolean dpadLeftToggle = false;
     public boolean dpadRightToggle = false;
+    public boolean leftBumperToggle = false;
+    public boolean rightBumperToggle = false;
+    public int bucketCount = 0;
+    public int highBarCount = 0;
     public boolean xToggle = false;
     public boolean yToggle = false;
     public boolean isDeliveryOpen = false;
     public boolean isForwards = false;
+    public boolean SlideMovingDown;
     public double deliveryWristPosition;
     boolean isIntakeOpen;
     private DcMotor rightBack;
     private DcMotor leftBack;
     private DcMotor leftFront;
     private DcMotor rightFront;
-    private DcMotor horizontalSlideMotor;
-    private DcMotor verticalSlideMotor;
+    private DcMotorEx horizontalSlideMotor;
+    private DcMotorEx verticalSlideMotor;
     private Servo intakeClaw;
     private Servo intakeWrist;
     private Servo intakeArm;
@@ -75,8 +85,8 @@ public class AS_TeleOp extends LinearOpMode {
         leftBack = hardwareMap.get(DcMotor.class, "left_back");
         leftFront = hardwareMap.get(DcMotor.class, "left_front");
         rightFront = hardwareMap.get(DcMotor.class, "right_front");
-        horizontalSlideMotor = hardwareMap.get(DcMotor.class, "horizontalSlideMotor");
-        verticalSlideMotor = hardwareMap.get(DcMotor.class, "verticalSlideMotor");
+        horizontalSlideMotor = hardwareMap.get(DcMotorEx.class, "horizontalSlideMotor");
+        verticalSlideMotor = hardwareMap.get(DcMotorEx.class, "verticalSlideMotor");
         intakeClaw = hardwareMap.get(Servo.class, "intakeClaw");
         intakeWrist = hardwareMap.get(Servo.class, "intakeWrist");
         intakeArm = hardwareMap.get(Servo.class, "intakeArm");
@@ -95,8 +105,10 @@ public class AS_TeleOp extends LinearOpMode {
                 if (gamepad2.right_trigger > 0.5 || gamepad1.left_stick_button) {
                     horizontal = (gamepad1.left_stick_x * 0.5);
                 }
+
                 speedSettings();
                 mecanumMath();
+
                 if (gamepad1.a) {
                     deliveryWrist.setPosition(dWTransfer);
                     deliveryClaw.setPosition(dCOpen);
@@ -121,6 +133,7 @@ public class AS_TeleOp extends LinearOpMode {
                             }, TransferDelay2
                     );
                 }
+
                 if (gamepad1.x && !xToggle) {
                     xToggle = true;
                     if (isDeliveryOpen) {
@@ -131,6 +144,7 @@ public class AS_TeleOp extends LinearOpMode {
                         isDeliveryOpen = true;
                     }
                 }
+
                 if (gamepad1.y && !yToggle) {
                     yToggle = true;
                     if (isIntakeOpen) {
@@ -141,6 +155,7 @@ public class AS_TeleOp extends LinearOpMode {
                         isIntakeOpen = true;
                     }
                 }
+
                 if (gamepad1.dpad_left && !dpadLeftToggle) {
                     dpadLeftToggle = true;
                     deliveryWristPosition = deliveryWrist.getPosition();
@@ -152,6 +167,7 @@ public class AS_TeleOp extends LinearOpMode {
                         deliveryWrist.setPosition(dWTransfer);
                     }
                 }
+
                 if (gamepad1.dpad_right && !dpadRightToggle) {
                     dpadRightToggle = true;
                     deliveryWristPosition = deliveryWrist.getPosition();
@@ -163,9 +179,11 @@ public class AS_TeleOp extends LinearOpMode {
                         deliveryWrist.setPosition(dWTransfer);
                     }
                 }
+
                 if (gamepad1.b) {
                     deliveryWrist.setPosition(dWTransfer);
                 }
+
                 if (gamepad1.dpad_up) {
                     downCounter = 0;
                     intakeArm.setPosition(iAUp);
@@ -192,13 +210,104 @@ public class AS_TeleOp extends LinearOpMode {
                         isIntakeOpen = true;
                     }
                 }
-                if (vertPos > 3000 && gamepad1.right_stick_y < 0.01) {
+
+                if (gamepad1.left_bumper && !leftBumperToggle && highBarCount == 0 && !SlideMovingDown) {
+                    bucketCount += 1;
+                    leftBumperToggle = true;
+                    if (bucketCount == 1) {
+                        verticalSlideMotor.setTargetPosition(bucketTicks);
+                        verticalSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        verticalSlideMotor.setVelocity(1400);
+                    } else if (bucketCount == 2) {
+                        if ((Math.abs(vertPos) + 10) >= bucketTicks) {
+                            deliveryWrist.setPosition(dWDeliverSpecimen);
+                            new Timer().schedule(
+                                    new java.util.TimerTask() {
+                                        @Override
+                                        public void run() {
+                                            deliveryClaw.setPosition(dCOpen);
+                                            new Timer().schedule(
+                                                    new java.util.TimerTask() {
+                                                        @Override
+                                                        public void run() {
+                                                            deliveryWrist.setPosition(dWTransfer);
+                                                            /*new Timer().schedule(
+                                                                    new java.util.TimerTask() {
+                                                                        @Override
+                                                                        public void run() {
+                                                                            deliveryClaw.setPosition(dCClose);
+                                                                        }
+                                                                    }, 200
+                                                            );*/
+                                                        }
+                                                    }, 500
+                                            );
+                                        }
+                                    }, 300
+                            );
+                        } else {
+                            bucketCount -= 1;
+                        }
+                    } else if (bucketCount == 3) {
+                        SlideMovingDown = true;
+                        verticalSlideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                        verticalSlideMotor.setPower(-0.7);
+                        bucketCount = 0;
+                    }
+                }
+
+                if (gamepad1.right_bumper && !rightBumperToggle && bucketCount == 0 && !SlideMovingDown) {
+                    highBarCount += 1;
+                    rightBumperToggle = true;
+                    if (highBarCount == 1) {
+                        verticalSlideMotor.setTargetPosition(highBarTicks);
+                        verticalSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        verticalSlideMotor.setVelocity(1400);
+                    } else if (highBarCount == 2) {
+                        if ((Math.abs(vertPos) + 10) >= highBarTicks) {
+                            verticalSlideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                            verticalSlideMotor.setPower(-0.7);
+                            SlideMovingDown = true;
+                            new Timer().schedule(
+                                    new java.util.TimerTask() {
+                                        @Override
+                                        public void run() {
+                                            deliveryClaw.setPosition(dCOpen);
+                                        }
+                                    }, 300
+                            );
+                            highBarCount = 0;
+                        } else {
+                            highBarCount -= 1;
+                        }
+                    }
+                }
+
+                if (SlideMovingDown && vertPos < 150) {
+                    new Timer().schedule(
+                            new java.util.TimerTask() {
+                                @Override
+                                public void run() {
+                                    verticalSlideMotor.setPower(0);
+                                    SlideMovingDown = false;
+                                }
+                            },300
+                    );
+                }
+
+                if (gamepad1.right_stick_button) {
+                    verticalSlideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                }
+
+                /*if (vertPos > 3000 && gamepad1.right_stick_y < 0.01) {
                     verticalSlideMotor.setPower(0.3);
-                } else if (gamepad1.right_stick_y > 0) {
-                    verticalSlideMotor.setPower(-gamepad1.right_stick_y * 0.4);
-                } else {
+                } else*/
+                if (gamepad1.right_stick_y > 0 && !SlideMovingDown) {
+                    verticalSlideMotor.setPower(-gamepad1.right_stick_y * 0.6);
+                } else if (!SlideMovingDown){
                     verticalSlideMotor.setPower(-gamepad1.right_stick_y * 0.7);
                 }
+
                 if (freeWristRotate) {
                     if (gamepad1.left_trigger > 0.1) {
                         intakeWristTargetPos += 0.01 * gamepad1.left_trigger;
@@ -212,12 +321,14 @@ public class AS_TeleOp extends LinearOpMode {
                     }
                     intakeWrist.setPosition(intakeWristTargetPos);
                 }
+
                 horizPos = horizontalSlideMotor.getCurrentPosition();
                 if (gamepad1.left_stick_y < 0) {
                     isForwards = true;
                 } else {
                     isForwards = false;
                 }
+
                 if (isForwards) {
                     if (horizPos < 90) {
                         horizontalSlideMotor.setPower(-0.35 * gamepad1.left_stick_y);
@@ -235,6 +346,7 @@ public class AS_TeleOp extends LinearOpMode {
                         horizontalSlideMotor.setPower(-0.5 * gamepad1.left_stick_y);
                     }
                 }
+
                 toggleVariables();
                 vertPos = verticalSlideMotor.getCurrentPosition();
                 telemetry.addData("vertSlidePos", vertPos);
@@ -340,6 +452,12 @@ public class AS_TeleOp extends LinearOpMode {
         }
         if (!gamepad1.dpad_right) {
             dpadRightToggle = false;
+        }
+        if (!gamepad1.left_bumper) {
+            leftBumperToggle = false;
+        }
+        if (!gamepad1.right_bumper) {
+            rightBumperToggle = false;
         }
     }
 }
