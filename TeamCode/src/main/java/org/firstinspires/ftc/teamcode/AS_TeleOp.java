@@ -16,7 +16,7 @@ import java.util.Timer;
 @TeleOp(name = "AS_TeleOp", group = "TeleOp")
 public class AS_TeleOp extends LinearOpMode {
     public static double iCOpen = 0.7;
-    public static double iCClose = 0.55;
+    public static double iCClose = 0.54;
     public static double iCAlign = 0.57;
     public static double iWTransferPos = 0.5;
     public static double iWAlteredPos = 0;
@@ -25,7 +25,7 @@ public class AS_TeleOp extends LinearOpMode {
     public static double iADown = 0.64;
     public static double iAReady = 0.5;
     public static double dCOpen = 0.5;
-    public static double dCClose = 0.35;
+    public static double dCClose = 0.31;
     public static double dWTransfer = 1;
     public static double dWDeliverBucket = 0.2;
     public static double dWDeliverSpecimen = 0;
@@ -215,9 +215,12 @@ public class AS_TeleOp extends LinearOpMode {
                     bucketCount += 1;
                     leftBumperToggle = true;
                     if (bucketCount == 1) {
-                        verticalSlideMotor.setTargetPosition(bucketTicks);
+                        deliveryClaw.setPosition(dCClose);
+                        isDeliveryOpen = false;
+                        deliveryWrist.setPosition(dWTransfer);
                         verticalSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        verticalSlideMotor.setVelocity(1400);
+                        verticalSlideMotor.setTargetPosition(-bucketTicks);
+                        verticalSlideMotor.setVelocity(-1400);
                     } else if (bucketCount == 2) {
                         if ((Math.abs(vertPos) + 10) >= bucketTicks) {
                             deliveryWrist.setPosition(dWDeliverSpecimen);
@@ -226,6 +229,7 @@ public class AS_TeleOp extends LinearOpMode {
                                         @Override
                                         public void run() {
                                             deliveryClaw.setPosition(dCOpen);
+                                            isDeliveryOpen = true;
                                             new Timer().schedule(
                                                     new java.util.TimerTask() {
                                                         @Override
@@ -251,7 +255,7 @@ public class AS_TeleOp extends LinearOpMode {
                     } else if (bucketCount == 3) {
                         SlideMovingDown = true;
                         verticalSlideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                        verticalSlideMotor.setPower(-0.7);
+                        verticalSlideMotor.setPower(0.7);
                         bucketCount = 0;
                     }
                 }
@@ -260,21 +264,25 @@ public class AS_TeleOp extends LinearOpMode {
                     highBarCount += 1;
                     rightBumperToggle = true;
                     if (highBarCount == 1) {
-                        verticalSlideMotor.setTargetPosition(highBarTicks);
                         verticalSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        verticalSlideMotor.setVelocity(1400);
+                        verticalSlideMotor.setTargetPosition(-highBarTicks);
+                        verticalSlideMotor.setVelocity(-1400);
+                        deliveryWrist.setPosition(dWDeliverSpecimen);
+                        deliveryClaw.setPosition(dCClose);
+                        isDeliveryOpen = false;
                     } else if (highBarCount == 2) {
                         if ((Math.abs(vertPos) + 10) >= highBarTicks) {
                             verticalSlideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                            verticalSlideMotor.setPower(-0.7);
+                            verticalSlideMotor.setPower(0.7);
                             SlideMovingDown = true;
                             new Timer().schedule(
                                     new java.util.TimerTask() {
                                         @Override
                                         public void run() {
                                             deliveryClaw.setPosition(dCOpen);
+                                            isDeliveryOpen = true;
                                         }
-                                    }, 300
+                                    }, 450
                             );
                             highBarCount = 0;
                         } else {
@@ -283,7 +291,7 @@ public class AS_TeleOp extends LinearOpMode {
                     }
                 }
 
-                if (SlideMovingDown && vertPos < 150) {
+                if (SlideMovingDown && vertPos > -150) {
                     new Timer().schedule(
                             new java.util.TimerTask() {
                                 @Override
@@ -295,17 +303,23 @@ public class AS_TeleOp extends LinearOpMode {
                     );
                 }
 
+                telemetry.addData("HighBarCount",highBarCount);
+                telemetry.addData("BucketCount",bucketCount);
+
                 if (gamepad1.right_stick_button) {
                     verticalSlideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    bucketCount = 0;
+                    highBarCount = 0;
+                    SlideMovingDown = false;
                 }
 
                 /*if (vertPos > 3000 && gamepad1.right_stick_y < 0.01) {
                     verticalSlideMotor.setPower(0.3);
                 } else*/
-                if (gamepad1.right_stick_y > 0 && !SlideMovingDown) {
-                    verticalSlideMotor.setPower(-gamepad1.right_stick_y * 0.6);
-                } else if (!SlideMovingDown){
-                    verticalSlideMotor.setPower(-gamepad1.right_stick_y * 0.7);
+                if (gamepad1.right_stick_y < 0 && !SlideMovingDown && (highBarCount == 0 && bucketCount == 0)) {
+                    verticalSlideMotor.setPower(gamepad1.right_stick_y * 0.6);
+                } else if (!SlideMovingDown && (highBarCount == 0 && bucketCount == 0)){
+                    verticalSlideMotor.setPower(gamepad1.right_stick_y * 0.7);
                 }
 
                 if (freeWristRotate) {
@@ -354,7 +368,9 @@ public class AS_TeleOp extends LinearOpMode {
                 telemetry.addData("intakeWristRotation", intakeWristTargetPos);
                 telemetry.addData("horizontalSlidePos", horizPos);
                 telemetry.addData("horizontalSlidePower", horizontalSlideMotor.getPower());
+                telemetry.addData("verticalSlidePower", verticalSlideMotor.getPower());
                 telemetry.addData("LeftStickY", gamepad1.left_stick_y);
+                telemetry.addData("RightStickY", gamepad1.right_stick_y);
                 telemetry.addData("downCounter", downCounter);
                 telemetry.update();
             }
@@ -404,7 +420,7 @@ public class AS_TeleOp extends LinearOpMode {
         verticalSlideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         verticalSlideMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         horizontalSlideMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        verticalSlideMotor.setDirection(DcMotor.Direction.REVERSE);
+        //verticalSlideMotor.setDirection(DcMotor.Direction.REVERSE);
         rightBack.setDirection(DcMotor.Direction.REVERSE);
         rightFront.setDirection(DcMotor.Direction.REVERSE);
         leftBack.setDirection(DcMotorSimple.Direction.REVERSE);

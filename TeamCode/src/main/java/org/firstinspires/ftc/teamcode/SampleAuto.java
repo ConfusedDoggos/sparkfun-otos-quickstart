@@ -29,7 +29,7 @@ public class SampleAuto extends LinearOpMode {
     // i = intake, iC = intake claw, iW = intake wrist, iA = intake arm
     // d = delivery, dC = delivery claw, dCR = delivery claw right, dCL = delivery claw left, dW = delivery wrist
     public static double iCOpen = 0.7;
-    public static double iCClose = 0.55;
+    public static double iCClose = 0.54;
     public static double iCAlign = 0.57;
     public static double iWTransferPos = 0.5;
     public static double iWAlteredPos = 0;
@@ -38,7 +38,7 @@ public class SampleAuto extends LinearOpMode {
     public static double iADown = 0.64;
     public static double iAReady = 0.5;
     public static double dCOpen = 0.5;
-    public static double dCClose = 0.35;
+    public static double dCClose = 0.31;
     public static double dWTransfer = 1;
     public static double dWDeliverBucket = 0.2;
     public static double dWDeliverSpecimen = 0;
@@ -58,13 +58,13 @@ public class SampleAuto extends LinearOpMode {
     public static double setTangent2 = 270;
     public static double setTangent3 = 90;
 
-    public static double splineToX1 = 55;
+    public static double splineToX1 = 56;
     public static double splineToY1 = 57;
     public static double splineToHeading1 = 45;
-    public static double splineToX2 = 54;
-    public static double splineToY2 = 54;
+    public static double splineToX2 = 55;
+    public static double splineToY2 = 55;
     public static double splineToHeading2 = 45;
-    public static double splineToX3 = 55;
+    public static double splineToX3 = 56;
     public static double splineToY3 = 55;
 
     public static double splineToHeading3 = 45;
@@ -78,7 +78,7 @@ public class SampleAuto extends LinearOpMode {
     public static double lineToX2 = 48;
     public static double lineToX3 = 48;
 
-    public static double strafeToX1 = 47.5;
+    public static double strafeToX1 = 47;
     public static double strafeToY1 = 38;
     public static double strafeToX2 = 57;
     public static double strafeToY2 = 37;
@@ -723,7 +723,7 @@ public class SampleAuto extends LinearOpMode {
                             new ParallelAction(
                                     drive.actionBuilder(new Pose2d(strafeToX1,strafeToY1,Math.toRadians(turnToHeading2)))
                                             .setTangent(Math.toRadians(setTangent2))
-                                            .splineToLinearHeading(new Pose2d(splineToX2, splineToY2,Math.toRadians(turnToHeading3)), Math.toRadians(splineToHeading2))
+                                            .splineToLinearHeading(new Pose2d(splineToX2, splineToY2,Math.toRadians(turnToHeading3)), Math.toRadians(splineToHeading2),null,slowMode)
                                             //.turnTo(Math.toRadians(turnToHeading3))
                                             .build(),
                                     verticalSlide.slideUp()

@@ -33,7 +33,7 @@ public class SpecimenAuto extends LinearOpMode {
     // i = intake, iC = intake claw, iW = intake wrist, iA = intake arm
     // d = delivery, dC = delivery claw, dCR = delivery claw right, dCL = delivery claw left, dW = delivery wrist
     public static double iCOpen = 0.7;
-    public static double iCClose = 0.55;
+    public static double iCClose = 0.54;
     public static double iCAlign = 0.57;
     public static double iWTransferPos = 0.5;
     public static double iWAlteredPos = 0;
@@ -42,7 +42,7 @@ public class SpecimenAuto extends LinearOpMode {
     public static double iADown = 0.64;
     public static double iAReady = 0.5;
     public static double dCOpen = 0.5;
-    public static double dCClose = 0.35;
+    public static double dCClose = 0.31;
     public static double dWTransfer = 0.95;
     public static double dWDeliverBucket = 0.2;
     public static double dWDeliverSpecimen = 0;
@@ -69,9 +69,9 @@ public class SpecimenAuto extends LinearOpMode {
     public static double strafeTo1X = -35;
     public static double strafeTo1Y = 37;
     public static double strafeTo2X = -35;
-    public static double strafeTo2Y = 15;
+    public static double strafeTo2Y = 12;
     public static double strafeTo3X = -48;
-    public static double strafeTo3Y = 15;
+    public static double strafeTo3Y = 12;
     public static double strafeTo4X = -48;
     public static double strafeTo4Y = 52;
     public static double strafeTo5X = -48;
